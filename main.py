@@ -1,12 +1,43 @@
 import cv2
-import communicate.py
+import math
+import time
+import communicate
+
 
 
 #settings
-##Colors for rectangles
+##Face recognition
+ ###Colors for rectangles
 colors = [(255, 153, 204), (153, 255, 255), (153, 255, 153), (255, 153, 153), (255, 255, 153), (255, 153, 255), (153, 153, 255), (153, 255, 255), (255, 255, 255)]
-##Controls how long to avarage face amounts
+ ###Controls how long to avarage face amounts
 avarageMax = 20
+confidenceMin = 0.5
+
+##Leds
+### arduino
+USE_ARDUINO = False # Make sure to set this true when connecting arduino otherwise nothing happens
+
+NUM_LEDS     = 60
+BAUDRATE = 200000
+PORT = 'COM4'
+### animation
+animationFrequencies = [1,2,3,4,5,6,7,8,9,10]
+brightnessAmplitude = 200
+brightnessOffset = 55
+
+
+
+
+#leds
+
+if USE_ARDUINO:
+    print("Connecting "+str(NUM_LEDS)+" leds to "+PORT+" at "+str(BAUDRATE)+" baudrate")
+    leds = [ [ 0, 0, 0 ] for i in range(NUM_LEDS) ]
+    state = communicate.connect_waiting(baudrate=BAUDRATE, port=PORT)
+    time.sleep(2)
+else:
+    print("Continuing without leds | set USE_ARDUINO to true to enable leds")
+timestamp = time.time()
 
 
 
@@ -68,20 +99,22 @@ while True:
         print("Gemmideld " + str(amount) + " gezichten in beeld")
 
 
+        #Led animation
+        frequency = animationFrequencies[int(amount)]
+        
+        #get point on sinus
+        t = time.time() - timestamp
+        t = t * frequency
+        amplitude = brightnessOffset + math.sin(t)*brightnessAmplitude
+
+        #Display a pulsing heart in bottom left
+        cv2.putText(frame, '<3', (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, amplitude), 2)
+
         #display
         cv2.imshow('Video', frame)
     except Exception as error:        
         print("Foutmelding: " + str(error))
 
-    if (amount > 0.7):
-        print("Leds aan")
-        ## LED SCRIPT CODE ##
-        #
-        #
-        #
-        #
-        #
-        #
     else:
         print("Leds uit")
         
