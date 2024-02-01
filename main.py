@@ -1,4 +1,6 @@
 import cv2
+import communicate.py
+
 
 #settings
 ##Colors for rectangles
