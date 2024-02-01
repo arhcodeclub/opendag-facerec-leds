@@ -21,11 +21,17 @@ NUM_LEDS     = 60
 BAUDRATE = 200000
 PORT = 'COM4'
 ### animation
+
+animationStyle = "wave" # Possible styles: simple, wave
+
 animationFrequencies = [1,2,3,4,5,6,7,8,9,10]
 brightnessAmplitude = 200
 brightnessOffset = 55
 colorChannel = 2   # In RGB 0 would be Red, 1 Green etc...
 
+#### If wave
+waveSpeed = 1
+waveStartPosition = 60
 
 
 
@@ -40,7 +46,7 @@ else:
     print("Continuing without leds | set USE_ARDUINO to true to enable leds")
 timestamp = time.time()
 
-
+wavePosition = waveStartPosition
 
 
 #Model data
@@ -115,10 +121,20 @@ while True:
         #Set leds
         if USE_ARDUINO:
             for i in range(NUM_LEDS):
-                leds[i][colorChannel] = int(amplitude)
+
+                if animationStyle == "simple":
+                    leds[i][colorChannel] = int(amplitude)
+                elif animationStyle == "wave":
+                    leds[i][colorChannel] = int(amplitude * math.sin(waveSpeed * (i + wavePosition)))  # Kinda yolo'd this so idk if this makes any sense or how this looks
+                    wavePosition += waveSpeed
+                    if wavePosition >= NUM_LEDS:
+                        wavePosition = 0
+
+            if time.time() - timestamp > 0.1:
+                timestamp = time.time()
                 #Send leds
                 print("Leds op " +str(amplitude))
-		        communicate.send_led_state(state, leds, 0)
+                communicate.send_led_state(state, leds, 0)
 
         #display
         cv2.imshow('Video', frame)
