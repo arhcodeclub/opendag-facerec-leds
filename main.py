@@ -24,6 +24,7 @@ PORT = 'COM4'
 animationFrequencies = [1,2,3,4,5,6,7,8,9,10]
 brightnessAmplitude = 200
 brightnessOffset = 55
+colorChannel = 2   # In RGB 0 would be Red, 1 Green etc...
 
 
 
@@ -110,13 +111,19 @@ while True:
         #Display a pulsing heart in bottom left
         cv2.putText(frame, '<3', (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, amplitude), 2)
 
+
+        #Set leds
+        if USE_ARDUINO:
+            for i in range(NUM_LEDS):
+                leds[i][colorChannel] = int(amplitude)
+                #Send leds
+                print("Leds op " +str(amplitude))
+		        communicate.send_led_state(state, leds, 0)
+
         #display
         cv2.imshow('Video', frame)
     except Exception as error:        
         print("Foutmelding: " + str(error))
-
-    else:
-        print("Leds uit")
         
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
